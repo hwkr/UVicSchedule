@@ -20,9 +20,10 @@ def main():
 
     # Once we're done with the login (if necessary), the final response object url should be at MyCard history
     logging.debug('Parsing output')
-    accountHistorySoup = BeautifulSoup(response.read(), "html.parser")
+    timetable_html = response.read();
+    timetable_soup = BeautifulSoup(timetable_html, "html.parser")
 
-    ufsBalance = accountHistorySoup.find('option', attrs={"value": "798883"})['data-balance']
+    ufsBalance = timetable_soup.find('option', attrs={"value": "798883"})['data-balance']
 
     # Save our newly found out data and the time to the file
     logging.debug('Updating balance file')
