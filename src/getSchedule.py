@@ -16,12 +16,11 @@ def main():
     auth = uvic.Auth()
 
     # Attempt to open the MyCard page
-    response = auth.load('https://www.uvic.ca/MyCard/account/history')
+    response = auth.load('https://www.uvic.ca/BAN2P/bwskfshd.P_CrseSchdDetl')
 
     # Once we're done with the login (if necessary), the final response object url should be at MyCard history
     logging.debug('Parsing output')
-    accountHistoryHtml = response.read()
-    accountHistorySoup = BeautifulSoup(accountHistoryHtml, "html.parser")
+    accountHistorySoup = BeautifulSoup(response.read(), "html.parser")
 
     ufsBalance = accountHistorySoup.find('option', attrs={"value": "798883"})['data-balance']
 

@@ -5,6 +5,7 @@ from getpass import getpass
 import mechanize
 
 
+
 # TODO: find somewhere better to store cookies
 COOKIES_FILE = '.cookies'
 
@@ -40,14 +41,38 @@ class Auth:
             self._browser.select_form("credentials")
 
             # Enter the credentials
-            self._browser.form['username'] = raw_input('Netlink ID:')
+            self._browser.form['username'] = raw_input('Netlink ID: ')
             self._browser.form['password'] = getpass()
             self._browser.form['workstationType'] = ['Private']
 
             # Login
             response = self._browser.submit()
 
-            # Save the browser cookies to a file
+        # Check for a Semester Selection Form
+        for form in self._browser.forms():
+            if form.action == 'https://www.uvic.ca/BAN2P/bwskfshd.P_CrseSchdDetl':
+
+                print "Please select a term:"
+
+                # Grab the selector
+                self._browser.form = form
+                selector = self._browser.find_control('term_in')
+                terms = [i for i in selector.items if '(View only)' not in i.get_labels()[0]._text]
+                for i, option in enumerate(terms):
+                    print "  [{0}] {1}".format(i + 1, option.get_labels()[0]._text)
+
+                term_number = None
+                while type(term_number) is not int or term_number >= len(terms) or term_number < 0:
+                    try:
+                        term_number = int(raw_input('Select term: ')) - 1
+                    except ValueError:
+                        continue
+
+                print terms[term_number].get_labels()[0]._text
+
+                break
+
+        # Save the browser cookies to a file
         # noinspection PyProtectedMember
         self._browser._ua_handlers['_cookies'].cookiejar.save(COOKIES_FILE, ignore_discard=True, ignore_expires=True)
 
