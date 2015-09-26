@@ -10,3 +10,7 @@ The script uses [BeautifulSoup4](http://www.crummy.com/software/BeautifulSoup/) 
 pip install beautifulsoup4 
 pip install mechanize
 ```
+
+## Credits
+
+[Denis Kisselev](https://github.com/dkisselev) for the original UVic Auth script.
