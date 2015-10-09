@@ -23,7 +23,10 @@ def main():
     timetable_html = response.read();
     timetable_soup = BeautifulSoup(timetable_html, "html.parser")
 
-    ufsBalance = timetable_soup.find('option', attrs={"value": "798883"})['data-balance']
+    courses = timetable_soup.find_all('table', attrs={
+        "class": "datadisplaytable",
+        "summary": "This layout table is used to present the schedule course detail"
+    })
 
     # Save our newly found out data and the time to the file
     logging.debug('Updating balance file')
