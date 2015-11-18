@@ -1,13 +1,13 @@
-import sys
-import re
 import logging
+import re
+import sys
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 
 import uvic
 
-
-COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [0-9]+) - [A-Z][0-9]+")
+COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [0-9]+) - ([A-Z][0-9]+)")
 
 def main():
     # Set up logging
@@ -31,7 +31,19 @@ def main():
     })
     for course in courses:
         title = course.find("caption").string
-        course_code = COURSE_TITLE_RE.match(title).groups()[0]
+        title_match = COURSE_TITLE_RE.match(title)
+        course_code = title_match.groups()[0]
+        course_section = title_match.groups()[1]
+
+        logging.info('Parsing ' + course_code)
+
+        course_info = course.find_next_sibling('table', attrs={
+            "class": "datadisplaytable",
+            "summary": "This table lists the scheduled meeting times and assigned instructors for this class.."
+        }).find_all("tr")[1].find_all("td")
+
+        date_range = [datetime.strptime(date.strip(), "%b %d, %Y") for date in course_info[4].string.split("-")]
+
         print course_code
 
     logging.info('Done')
