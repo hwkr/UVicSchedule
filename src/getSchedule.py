@@ -1,7 +1,7 @@
 import logging
 import re
 import sys
-from datetime import datetime
+import datetime
 
 import pytz
 from bs4 import BeautifulSoup
@@ -12,6 +12,7 @@ import uvic
 
 COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [0-9]+) - ([A-Z][0-9]+)")
 
+
 ICAL_WEEKDAY_DICTIONARY = {
     "Su": "SU",  # TODO: Figure out if this is right
     "M": "MO",
@@ -20,7 +21,18 @@ ICAL_WEEKDAY_DICTIONARY = {
     "R": "TH",
     "F": "FR",
     "S": "SA"
+
 }
+
+ICAL_WEEKDAYS = [
+    "MO",
+    "TU",
+    "WE",
+    "TH",
+    "FR",
+    "SA",
+    "SU"
+]
 
 ICAL_FREQUENCY_DICTIONARY = {
     "Every Week": 1,
@@ -55,7 +67,6 @@ def main():
     cal.add('version', '0.1')
 
     for course in courses:
-        event = Event()
 
         title = course.find("caption").string
         title_match = COURSE_TITLE_RE.match(title)
@@ -64,36 +75,45 @@ def main():
 
         logging.info('Parsing ' + code)
 
-        info_soup = course.find_next_sibling('table', attrs={
+        meeting_times = course.find_next_sibling('table', attrs={
             "class": "datadisplaytable",
             "summary": "This table lists the scheduled meeting times and assigned instructors for this class.."
-        }).find_all("tr")[1].find_all("td")
+        }).find_all("tr")[1:]  # skip the first row (headers)
 
-        type = info_soup[5].string
-        instructor = info_soup[6].string
-        location = info_soup[3].string
+        for meeting_time in meeting_times:
+            event = Event()
 
-        time_range = [datetime.strptime(time.strip(), "%I:%M %p") for time in info_soup[1].string.split("-")]
-        date_range = [datetime.strptime(date.strip(), "%b %d, %Y") for date in info_soup[4].string.split("-")]
+            time_soup = meeting_time.find_all("td")
 
-        start_datetime = date_range[0].replace(hour=time_range[0].hour, minute=time_range[0].minute,
-                                               tzinfo=pytz.timezone("America/Vancouver"))
-        end_datetime = start_datetime + (time_range[1] - time_range[0])
-        until_datetime = date_range[1].replace(tzinfo=pytz.timezone("America/Vancouver"))
+            meeting_type = time_soup[5].string
+            instructor = time_soup[6].string
+            location = time_soup[3].string
 
-        interval = ICAL_FREQUENCY_DICTIONARY[info_soup[0].string]
-        weekdays = [ICAL_WEEKDAY_DICTIONARY[day] for day in info_soup[2].string.strip()]
+            time_range = [datetime.datetime.strptime(time.strip(), "%I:%M %p") for time in
+                          time_soup[1].string.split("-")]
+            date_range = [datetime.datetime.strptime(date.strip(), "%b %d, %Y") for date in
+                          time_soup[4].string.split("-")]
 
-        event.add('summary', code + " " + type)
-        event.add('dtstart', start_datetime)
-        event.add('dtend', end_datetime)
-        event.add('dtstamp', datetime.utcnow().replace(tzinfo=pytz.utc))
-        event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
+            interval = ICAL_FREQUENCY_DICTIONARY[time_soup[0].string]
+            weekdays = [ICAL_WEEKDAY_DICTIONARY[day] for day in time_soup[2].string.strip()]
 
-        event['location'] = vText(location)
-        # event['RRULE'] = ";".join([interval_ical, weekdays_ical, until_ical])
+            start_datetime = date_range[0].replace(hour=time_range[0].hour, minute=time_range[0].minute,
+                                                   tzinfo=pytz.timezone("America/Vancouver"))
+            while ICAL_WEEKDAYS[start_datetime.weekday()] != weekdays[0]:
+                start_datetime += datetime.timedelta(days=1)
 
-        cal.add_component(event)
+            end_datetime = start_datetime + (time_range[1] - time_range[0])
+            until_datetime = date_range[1].replace(tzinfo=pytz.timezone("America/Vancouver"))
+
+            event.add('summary', code + " " + meeting_type)
+            event.add('dtstart', start_datetime)
+            event.add('dtend', end_datetime)
+            event.add('dtstamp', datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
+            event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
+
+            event['location'] = vText(location)
+
+            cal.add_component(event)
 
     print cal.to_ical()
 
