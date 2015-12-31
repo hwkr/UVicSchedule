@@ -64,7 +64,7 @@ def main():
     # Make the Calendar
     cal = Calendar()
     cal.add('prodid', '-//Ben Hawker//UVic Calendar Extractor//EN')
-    cal.add('version', '0.1')
+    cal.add('version', '2.0')
 
     for course in courses:
 
@@ -85,17 +85,21 @@ def main():
 
             time_soup = meeting_time.find_all("td")
 
-            meeting_type = time_soup[5].string
-            instructor = time_soup[6].string
+            meeting_type = time_soup[5].text
+            description = {
+                "Instructor": time_soup[6].text,
+                "Section": section
+            }
+
             location = time_soup[3].string
 
             time_range = [datetime.datetime.strptime(time.strip(), "%I:%M %p") for time in
-                          time_soup[1].string.split("-")]
+                          time_soup[1].text.split("-")]
             date_range = [datetime.datetime.strptime(date.strip(), "%b %d, %Y") for date in
-                          time_soup[4].string.split("-")]
+                          time_soup[4].text.split("-")]
 
-            interval = ICAL_FREQUENCY_DICTIONARY[time_soup[0].string]
-            weekdays = [ICAL_WEEKDAY_DICTIONARY[day] for day in time_soup[2].string.strip()]
+            interval = ICAL_FREQUENCY_DICTIONARY[time_soup[0].text]
+            weekdays = [ICAL_WEEKDAY_DICTIONARY[day] for day in time_soup[2].text.strip()]
 
             start_datetime = date_range[0].replace(hour=time_range[0].hour, minute=time_range[0].minute,
                                                    tzinfo=pytz.timezone("America/Vancouver"))
@@ -112,6 +116,7 @@ def main():
             event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
 
             event['location'] = vText(location)
+            event['description'] = vText("\n".join([item + ": " + value for item, value in description.iteritems()]))
 
             cal.add_component(event)
 
