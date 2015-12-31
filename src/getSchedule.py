@@ -3,11 +3,30 @@ import re
 import sys
 from datetime import datetime
 
+import pytz
 from bs4 import BeautifulSoup
+from icalendar import Calendar, Event, vText
 
 import uvic
 
+
 COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [0-9]+) - ([A-Z][0-9]+)")
+
+ICAL_WEEKDAY_DICTIONARY = {
+    "Su": "SU",  # TODO: Figure out if this is right
+    "M": "MO",
+    "T": "TU",
+    "W": "WE",
+    "R": "TH",
+    "F": "FR",
+    "S": "SA"
+}
+
+ICAL_FREQUENCY_DICTIONARY = {
+    "Every Week": 1,
+    "Every Second Week": 2
+}
+
 
 def main():
     # Set up logging
@@ -29,22 +48,58 @@ def main():
         "class": "datadisplaytable",
         "summary": "This layout table is used to present the schedule course detail"
     })
+
+    # Make the Calendar
+    cal = Calendar()
+    cal.add('prodid', '-//Ben Hawker//UVic Calendar Extractor//EN')
+    cal.add('version', '0.1')
+
     for course in courses:
+        event = Event()
+
         title = course.find("caption").string
         title_match = COURSE_TITLE_RE.match(title)
-        course_code = title_match.groups()[0]
-        course_section = title_match.groups()[1]
+        code = title_match.groups()[0]
+        section = title_match.groups()[1]
 
-        logging.info('Parsing ' + course_code)
+        logging.info('Parsing ' + code)
 
-        course_info = course.find_next_sibling('table', attrs={
+        info_soup = course.find_next_sibling('table', attrs={
             "class": "datadisplaytable",
             "summary": "This table lists the scheduled meeting times and assigned instructors for this class.."
         }).find_all("tr")[1].find_all("td")
 
-        date_range = [datetime.strptime(date.strip(), "%b %d, %Y") for date in course_info[4].string.split("-")]
+        type = info_soup[5].string
+        instructor = info_soup[6].string
+        location = info_soup[3].string
 
-        print course_code
+        time_range = [datetime.strptime(time.strip(), "%I:%M %p") for time in info_soup[1].string.split("-")]
+        date_range = [datetime.strptime(date.strip(), "%b %d, %Y") for date in info_soup[4].string.split("-")]
+
+        start_datetime = date_range[0].replace(hour=time_range[0].hour, minute=time_range[0].minute,
+                                               tzinfo=pytz.timezone("America/Vancouver"))
+        end_datetime = start_datetime + (time_range[1] - time_range[0])
+        until_datetime = date_range[1].replace(tzinfo=pytz.timezone("America/Vancouver"))
+
+        interval = ICAL_FREQUENCY_DICTIONARY[info_soup[0].string]
+        weekdays = [ICAL_WEEKDAY_DICTIONARY[day] for day in info_soup[2].string.strip()]
+
+        event.add('summary', code + " " + type)
+        event.add('dtstart', start_datetime)
+        event.add('dtend', end_datetime)
+        event.add('dtstamp', datetime.utcnow().replace(tzinfo=pytz.utc))
+        event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
+
+        event['location'] = vText(location)
+        # event['RRULE'] = ";".join([interval_ical, weekdays_ical, until_ical])
+
+        cal.add_component(event)
+
+    print cal.to_ical()
+
+    f = open('cal.ics', 'wb')
+    f.write(cal.to_ical())
+    f.close()
 
     logging.info('Done')
 
