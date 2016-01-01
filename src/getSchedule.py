@@ -10,7 +10,7 @@ from icalendar import Calendar, Event, vText
 import uvic
 
 
-COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [0-9]+) - ([A-Z][0-9]+)")
+COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [A-Z0-9]*) - ([A-Z][0-9]+)")
 
 
 ICAL_WEEKDAY_DICTIONARY = {
