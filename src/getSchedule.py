@@ -39,6 +39,8 @@ ICAL_FREQUENCY_DICTIONARY = {
     "Every Second Week": 2
 }
 
+output_file = "out/calendar.ics"
+
 
 def main():
     # Set up logging
@@ -122,7 +124,7 @@ def main():
 
     print cal.to_ical()
 
-    f = open('cal.ics', 'wb')
+    f = open(output_file, 'wb')
     f.write(cal.to_ical())
     f.close()
 
@@ -131,9 +133,11 @@ def main():
 
 if __name__ == "__main__":
 
-    if len(sys.argv) is not 1:
-        print "Usage: python {0}".format(sys.argv[0])
+    if len(sys.argv) > 2:
+        print "Usage: python {0} [<output file>]".format(sys.argv[0])
         sys.exit(0)
+    elif len(sys.argv) == 2:
+        output_file = sys.argv[1]
 
     try:
         main()
