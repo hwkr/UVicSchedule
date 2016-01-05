@@ -37,7 +37,7 @@ class Auth:
 
         # If the session cookie that we have is expired, we will be redirected to the CAS login page so we check
         # the resulting final url and login if necessary
-        if response.geturl().startswith('https://www.uvic.ca/cas/login'):
+        while response.geturl().startswith('https://www.uvic.ca/cas/login'):
             # Select the credentials form
             self._browser.select_form("credentials")
 
