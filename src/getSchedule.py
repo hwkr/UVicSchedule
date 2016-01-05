@@ -131,8 +131,8 @@ def main():
 
 if __name__ == "__main__":
 
-    if len(sys.argv) is not 2:
-        print "Usage: python {0} <netlink>".format(sys.argv[0])
+    if len(sys.argv) is not 1:
+        print "Usage: python {0}".format(sys.argv[0])
         sys.exit(0)
 
     try:
