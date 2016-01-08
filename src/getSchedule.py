@@ -1,5 +1,4 @@
 import logging
-import re
 import sys
 import datetime
 
@@ -8,10 +7,6 @@ from bs4 import BeautifulSoup
 from icalendar import Calendar, Event, vText
 
 import uvic
-
-
-COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [A-Z0-9]*) - ([A-Z][0-9]+)")
-
 
 ICAL_WEEKDAY_DICTIONARY = {
     "Su": "SU",  # TODO: Figure out if this is right
@@ -71,11 +66,13 @@ def main():
     for course in courses:
 
         title = course.find("caption").string
-        title_match = COURSE_TITLE_RE.match(title)
-        code = title_match.groups()[0]
-        section = title_match.groups()[1]
 
-        logging.info('Parsing ' + code)
+        titletokens = title.split(" - ")
+
+        coursecode = titletokens[1]
+        coursesection = titletokens[2]
+
+        logging.info('Parsing ' + coursecode)
 
         meeting_times = course.find_next_sibling('table', attrs={
             "class": "datadisplaytable",
@@ -90,7 +87,7 @@ def main():
             meeting_type = time_soup[5].text
             description = {
                 "Instructor": time_soup[6].text,
-                "Section": section
+                "Section": coursesection
             }
 
             location = time_soup[3].string
@@ -111,7 +108,7 @@ def main():
             end_datetime = start_datetime + (time_range[1] - time_range[0])
             until_datetime = date_range[1].replace(tzinfo=pytz.timezone("America/Vancouver"))
 
-            event.add('summary', code + " " + meeting_type)
+            event.add('summary', coursecode + " " + meeting_type)
             event.add('dtstart', start_datetime)
             event.add('dtend', end_datetime)
             event.add('dtstamp', datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
