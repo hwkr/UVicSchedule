@@ -40,6 +40,11 @@ ICAL_FREQUENCY_DICTIONARY = {
 }
 
 output_file = "out/calendar.ics"
+UVIC_BUILDING_CODES = {
+    "Cornett Building": "COR",
+    "Engineering Comp Science Bldg": "ECS",
+    "Engineering Lab Wing": "ELW"
+}
 
 
 def main():
@@ -117,7 +122,7 @@ def main():
             event.add('dtstamp', datetime.datetime.utcnow().replace(tzinfo=pytz.utc))
             event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
 
-            event['location'] = vText(location)
+            event['location'] = vText(locationmatch(location))
             event['description'] = vText("\n".join([item + ": " + value for item, value in description.iteritems()]))
 
             cal.add_component(event)
@@ -129,6 +134,23 @@ def main():
     f.close()
 
     logging.info('Done')
+
+def locationmatch(location):
+    """
+    Convert full-length location names to a shortcode variant
+
+    :param location: A full-length building location string: Engineering Computer Science Bldg 125
+    :return: Shortcode version of location: ECS 125
+    """
+    # Tokenize the room # away from the building
+    building, room = location.rsplit(' ', 1)
+
+    # If we know the short code for a building, return it, otherwise pass the original value straight through
+    if building in UVIC_BUILDING_CODES:
+        return UVIC_BUILDING_CODES[building] + " " + room
+    else:
+        return location
+
 
 
 if __name__ == "__main__":
