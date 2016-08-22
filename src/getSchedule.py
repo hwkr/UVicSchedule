@@ -116,7 +116,7 @@ def main():
                 start_datetime += datetime.timedelta(days=1)
 
             end_datetime = start_datetime + (time_range[1] - time_range[0])
-            until_datetime = date_range[1].replace(tzinfo=pytz.timezone("America/Vancouver"))
+            until_datetime = date_range[1].replace(hour=23, minute=59, second=59, tzinfo=pytz.timezone("America/Vancouver"))
 
             event.add('summary', code + " " + meeting_type)
             event.add('dtstart', start_datetime)
