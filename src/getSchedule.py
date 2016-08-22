@@ -96,7 +96,7 @@ def main():
 
             meeting_type = time_soup[5].text
             description = {
-                "Instructor": time_soup[6].text,
+                "Instructor": re.sub(" ?\([A-Z]\)", "", re.sub("  +", " ",time_soup[6].text)),
                 "Section": section
             }
 
