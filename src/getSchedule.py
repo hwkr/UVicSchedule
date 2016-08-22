@@ -1,8 +1,10 @@
 import logging
 import re
 import sys
+import os
 import datetime
 
+import errno
 import pytz
 from bs4 import BeautifulSoup
 from icalendar import Calendar, Event, vText
@@ -10,7 +12,7 @@ from icalendar import Calendar, Event, vText
 import uvic
 
 
-COURSE_TITLE_RE = re.compile(r"[^-]+- ([A-Z]+ [A-Z0-9]*) - ([A-Z][0-9]+)")
+COURSE_TITLE_RE = re.compile(r"([A-Z]+ [A-Z0-9]*) - ([A-Z][0-9]+)")
 
 
 ICAL_WEEKDAY_DICTIONARY = {
@@ -76,7 +78,7 @@ def main():
     for course in courses:
 
         title = course.find("caption").string
-        title_match = COURSE_TITLE_RE.match(title)
+        title_match = COURSE_TITLE_RE.search(title)
         code = title_match.groups()[0]
         section = title_match.groups()[1]
 
@@ -110,7 +112,7 @@ def main():
 
             start_datetime = date_range[0].replace(hour=time_range[0].hour, minute=time_range[0].minute,
                                                    tzinfo=pytz.timezone("America/Vancouver"))
-            while ICAL_WEEKDAYS[start_datetime.weekday()] != weekdays[0]:
+            while ICAL_WEEKDAYS[start_datetime.weekday()] not in weekdays:
                 start_datetime += datetime.timedelta(days=1)
 
             end_datetime = start_datetime + (time_range[1] - time_range[0])
@@ -129,9 +131,16 @@ def main():
 
     print cal.to_ical()
 
-    f = open(output_file, 'wb')
-    f.write(cal.to_ical())
-    f.close()
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(output_file, 'wb') as f:
+        f.write(cal.to_ical())
+        f.close()
 
     logging.info('Done')
 
