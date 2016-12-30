@@ -51,7 +51,7 @@ class Auth:
 
         # Check for a Semester Selection Form
         for form in self._browser.forms():
-            if form.action == 'https://www.uvic.ca/BAN2P/bwskfshd.P_CrseSchdDetl':
+            if form.action.endswith('/bwskfshd.P_CrseSchdDetl'):
 
                 print "Please select a term:"
 
