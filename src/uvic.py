@@ -39,12 +39,11 @@ class Auth:
         # the resulting final url and login if necessary
         while response.geturl().startswith('https://www.uvic.ca/cas/login'):
             # Select the credentials form
-            self._browser.select_form("credentials")
+            self._browser.select_form(predicate=lambda form:"id" in form.attrs and form.attrs['id'] == "fm1")
 
             # Enter the credentials
             self._browser.form['username'] = raw_input('Netlink ID: ')
             self._browser.form['password'] = getpass()
-            self._browser.form['workstationType'] = ['Private']
 
             # Login
             response = self._browser.submit()
