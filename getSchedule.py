@@ -142,7 +142,7 @@ def main():
                 "Section": section,
                 "CRN": crn,
                 "Registration Status": status,
-                "Instructors Email Address": email_address
+                "Contact Information": email_address
             }
 
             # Create location
@@ -178,6 +178,9 @@ def main():
             # Add location and description
             event['location'] = vText(locationmatch(location))
             event['description'] = vText("\n".join([item + ": " + value for item, value in description.items()]))
+
+            # Add UID
+            event['uid'] = str(crn) + '-' + str(start_datetime.year) + '-' + str(start_datetime.month) + '@uvic.ca'
 
             # Add event to calendar component
             cal.add_component(event)
