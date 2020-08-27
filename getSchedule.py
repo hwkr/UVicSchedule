@@ -120,6 +120,10 @@ def main():
 
             # Find all times
             time_soup = meeting_time.find_all("td")
+            
+            if (time_soup[1].text == 'TBA'):
+                logging.info('Course ' + code + ' has no Meeting Times. Skipping.')
+                break
 
             # Create meeting type
             meeting_type = time_soup[5].text
