@@ -70,7 +70,7 @@ class Auth:
                 # Ignore all (View only) options
                 terms = [i for i in selector.items if '(View only)' not in i.get_labels()[0].text]
                 # Print term selection options plus option to select
-                for i, option in enumerate(terms):
+                for i, option in enumerate(reversed(terms)):
                     print("    [{0}] {1}".format(i + 1, option.get_labels()[0].text))
 
                 # Add selected term to term_number
