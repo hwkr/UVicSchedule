@@ -50,6 +50,7 @@ Below is a list of links to resources if you need help, or want to read more abo
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//UVic Schedule//UVic Schedule to Calendar Format Script//EN
+X-WR-CALNAME:TERM Session: MONTH - MONTH YEAR
 BEGIN:VEVENT
 SUMMARY:COURSE XXX TYPE
 DTSTART;TZID=America/Vancouver;VALUE=DATE-TIME:XXXXXXXXTXXXXXX
@@ -60,6 +61,11 @@ RRULE:FREQ=FREQUENCY;UNTIL=XXXXXXXXTXXXXXX;INTERVAL=X;BYDAY=DAY
 DESCRIPTION:Instructor: FirstName LastName\nSection: XXX\nCRN: XXXXX\nRegistr
  ation Status: STATUS\nContact Information: EMAIL
 LOCATION:LOCATION
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:This is an event reminder!
+TRIGGER;TZID=America/Vancouver;VALUE=DATE-TIME:XXXXXXXXTXXXXXX
+END:VALARM
 END:VEVENT
 END:VCALENDA
 ```

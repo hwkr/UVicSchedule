@@ -9,7 +9,7 @@ import sys
 # Import BeatifulSoup from bs4
 from bs4 import BeautifulSoup
 # Import Calendar, Event, vText from icalendar
-from icalendar import Calendar, Event, vText
+from icalendar import Calendar, Event, vText, Alarm
 
 # Import UVic Class from uvic.py
 import uvic
@@ -90,6 +90,7 @@ def main():
     cal = Calendar()
     cal.add('version', '2.0')
     cal.add('prodid', '-//UVic Schedule//UVic Schedule to Calendar Format Script//EN')
+    cal.add('X-WR-CALNAME', timetable_soup.find_all('div', attrs={"class": 'staticheaders'})[0].text.split('\n')[2])
 
     # Add each course to calendar
     for course in courses:
@@ -185,6 +186,18 @@ def main():
 
             # Add UID
             event['uid'] = str(crn) + '-' + str(start_datetime.year) + '-' + str(start_datetime.month) + '@uvic.ca'
+
+            # Create alarm
+            alarm = Alarm()
+
+            # Add alarm
+            alarm_time = start_datetime - datetime.timedelta(minutes=15)
+            alarm.add('action', 'DISPLAY')
+            alarm.add('description', 'This is an event reminder!')
+            alarm.add('trigger', alarm_time)
+
+            # Add alarm to event
+            event.add_component(alarm)
 
             # Add event to calendar component
             cal.add_component(event)
