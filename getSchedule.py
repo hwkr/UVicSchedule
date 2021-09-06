@@ -50,9 +50,81 @@ ICAL_FREQUENCY_DICTIONARY = {
 
 # UVic Building Codes
 UVIC_BUILDING_CODES = {
+    "Alice Ravenhill Hall": "RRA",
+    "Arthur Currie": "RAC",
+    "Bamfield Marine Sciences Centre": "BMSC",
+    "Bev Glover Greenhouse Facility": "GGF",
+    "Bob Wright Centre": "BWC",
+    "Business & Economics Building": "BEC",
+    "Campus Security Building": "SEC",
+    "Campus Services": "CSR",
+    "Carroll": "RCA",
+    "Centennial Stadium": "STA",
+    "Centre for Athletics, Recreation and Special Abilities": "CARSA",
+    "Child Care Complex": "CCC",
+    "Clearihue": "CLE",
+    "Continuing Studies": "CST",
+    "Cornett": "COR",
     "Cornett Building": "COR",
+    "Craigdarroch Office": "CRA",
+    "Cunningham": "CUN",
+    "David Strong": "DSB",
+    "David Strong Building": "DSB",
+    "David Thompson": "RDT",
+    "David Turpin": "DTB",
+    "Elliott Building": "ELL",
     "Engineering Comp Science Bldg": "ECS",
-    "Engineering Lab Wing": "ELW"
+    "Engineering & Computer Science": "ECS",
+    "Engineering Lab Wing": "ELW",
+    "Engineering Office Wing": "EOW",
+    "Enterprise Data Centre": "EDC",
+    "Fine Arts": "FIA",
+    "First Peoples House": "FPH",
+    "Fraser": "FRA",
+    "Halpern Centre for Graduate Students": "GSC",
+    "Health and Wellness": "HWB",
+    "Helmcken": "RHE",
+    "Hickman": "HHB",
+    "Hodges": "RHO",
+    "Hugh Stephen": "RHS",
+    "Human & Social Development": "HSD",
+    "Ian Stewart Complex": "ISC",
+    "Jamie Cassels Centre": "JCC",
+    "Joseph Cunliffe": "RJC",
+    "Lansdowne Residence #1": "RL1",
+    "Lou-Poy Child Care Centre": "HLP",
+    "MacLaurin": "MAC",
+    "Marine Technology Centre": "MTC",
+    "McKinnon": "MCK",
+    "McPherson Library": "LIB",
+    "Mearns Centre for Learning": "MCL",
+    "Medical Sciences": "MSB",
+    "Michael Williams": "MWB",
+    "Modular Dining Facility": "MOD",
+    "Outdoor Aquatic Unit": "OAU",
+    "Park": "R42",
+    "Petch": "PCH",
+    "Phoenix Theatre": "PNX",
+    "Poole House": "RPH",
+    "R. Haig Brown": "RHB",
+    "Richard Wilson": "RRW",
+    "Ring Road": "R40",
+    "Robert Wallace Hall": "RWA",
+    "Sanderson": "RSA",
+    "Saunders": "SAU",
+    "Saunders Annex": "SAA",
+    "Sedgewick": "SED",
+    "Shirley Baker": "RSB",
+    "South Tower": "R43",
+    "Student Union": "SUB",
+    "Tower": "R41",
+    "University Club": "UCL",
+    "University House 1": "UH1",
+    "University House 2": "UH2",
+    "University House 3": "UH3",
+    "University House 4": "UH4",
+    "University House 5": "UH5",
+    "Visual Arts": "VIA",
 }
 
 # Main
@@ -181,23 +253,14 @@ def main():
             event.add('rrule', {'FREQ': ['weekly'], 'BYDAY': weekdays, 'INTERVAL': interval, "UNTIL": until_datetime})
 
             # Add location and description
-            event['location'] = vText(locationmatch(location))
-            event['description'] = vText("\n".join([item + ": " + value for item, value in description.items()]))
+            if (location != "TBA"):
+                event.add('location', location + " (" + locationmatch(location) + ")")
+            else:
+                event.add('location', locationmatch(location))
+            event.add('description', "\n".join([item + ": " + value for item, value in description.items()]))
 
             # Add UID
-            event['uid'] = str(crn) + '-' + str(start_datetime.year) + '-' + str(start_datetime.month) + '@uvic.ca'
-
-            # Create alarm
-            alarm = Alarm()
-
-            # Add alarm
-            alarm_time = start_datetime - datetime.timedelta(minutes=15)
-            alarm.add('action', 'DISPLAY')
-            alarm.add('description', 'This is an event reminder!')
-            alarm.add('trigger', alarm_time)
-
-            # Add alarm to event
-            event.add_component(alarm)
+            event.add('uid', str(crn) + '-' + str(start_datetime.year) + '-' + str(start_datetime.month) + '@uvic.ca')
 
             # Add event to calendar component
             cal.add_component(event)
