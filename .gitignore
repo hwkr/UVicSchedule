@@ -141,6 +141,7 @@ cython_debug/
 .cookies
 *.ics
 *.html
+.DS_Store
 
 # Codespaces
 pythonenv*
