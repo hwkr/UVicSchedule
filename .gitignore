@@ -140,6 +140,7 @@ cython_debug/
 # Project specific
 .cookies
 *.ics
+*.html
 
 # Codespaces
 pythonenv*
