@@ -2,7 +2,7 @@
 
 A Python Script for Creating an `.ics` File for your UVic Schedule. 
 
-The UVic Schedule Script uses [BeautifulSoup4](http://www.crummy.com/software/BeautifulSoup/),  [Mechanize](https://pypi.python.org/pypi/mechanize/), and [icalendar](https://pypi.org/project/icalendar/).
+The UVic Schedule Script uses [BeautifulSoup4](http://www.crummy.com/software/BeautifulSoup/), [Mechanize](https://pypi.python.org/pypi/mechanize/), and [icalendar](https://pypi.org/project/icalendar/).
 
 ## Setup
 
@@ -11,6 +11,14 @@ The UVic Schedule Script uses [BeautifulSoup4](http://www.crummy.com/software/Be
 ```sh
 pip3 install -r requirements.txt
 ```
+
+## Duo Authentication Users
+
+If you have Duo Authentication enabled, you will need to follow the instructions in `README-DUO.md` to create your `.ics` file.
+
+[README-DUO.md](./README-DUO.md)
+
+**Note** If you try to follow the instructions below you will not be able to create your `.ics` file.
 
 ## Usage
 
@@ -58,7 +66,7 @@ DTEND;TZID=America/Vancouver;VALUE=DATE-TIME:XXXXXXXXTXXXXXX
 DTSTAMP;VALUE=DATE-TIME:XXXXXXXXTXXXXXXZ
 UID:CRN-YEAR-MONTH@uvic.ca
 RRULE:FREQ=FREQUENCY;UNTIL=XXXXXXXXTXXXXXX;INTERVAL=X;BYDAY=DAY
-DESCRIPTION:Instructor: FirstName LastName\nSection: XXX\nCRN: XXXXX\nRegistr
+DESCRIPTION:Title: Cours Title\nInstructor: FirstName LastName\nSection: XXX\nCRN: XXXXX\nRegistr
  ation Status: STATUS\nContact Information: EMAIL
 LOCATION:LOCATION
 END:VEVENT
